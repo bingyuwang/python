@@ -1,13 +1,7 @@
 import random
-count = [0,0,0,0,0,0,0,0,0,0,0,0,0,]
-matrix = []
-for i in range(13):
-    matrix.append(count)
-
-##print matrix[0, 0]
+matrix = [([0] * 13) for i in range(13)]
 def ShuffleArray(arr, lenth):
     i = lenth
-    k = lenth
     if i == 0:
         return
     while i:
@@ -16,12 +10,13 @@ def ShuffleArray(arr, lenth):
         arr[i] = arr[j]
         arr[j] = temp
         i = i - 1
+    k = 0
     for elem in arr:
-        matrix[elem][k%lenth] += 1
+        matrix[int(elem)][k] += 1
         k += 1
 
 def main():
-    for i in range(100000):
+    for i in range(1000000):
         arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
         ShuffleArray(arr, 12)
 
