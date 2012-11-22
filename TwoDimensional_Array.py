@@ -3,19 +3,15 @@
 array = [0, 0, 0]
 matrix = [array*3]
 print matrix
-##[0,0,0,0,0,0,0,0,0]
+##[[0,0,0,0,0,0,0,0,0]]
 
 array = [0, 0, 0]
-matrix = []
-for i in range(3):
-    matrix.append(array)
+matrix = [array] * 3
 print matrix
 ##[[0, 0, 0], [0, 0, 0], [0, 0, 0]]
 
 array = [0, 0, 0]
-matrix = []
-for i in range(3):
-    matrix.append(array)
+matrix = [array] * 3
 matrix[0][1] = 1
 print matrix
 ##[[0, 1, 0], [0, 1, 0], [0, 1, 0]]
