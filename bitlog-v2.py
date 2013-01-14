@@ -1,4 +1,6 @@
 ﻿# coding:utf-8
+
+import pygtk
 import gtk
 import urllib
 import urllib2
@@ -17,20 +19,40 @@ class MainFrame(gtk.Window):
         self.set_position(gtk.WIN_POS_CENTER) # 窗口位置
         self.connect("destroy", gtk.main_quit)
         
-        login_btn = gtk.Button("Login") #登录按钮
+        login_img = gtk.Image()
+        login_img.set_from_file("login.png")
+        logout_img = gtk.Image()
+        logout_img.set_from_file("login.png")
+        setting_img = gtk.Image()
+        setting_img.set_from_file("setting.png")
+        about_img = gtk.Image()
+        about_img.set_from_file("about.png")
+        
+        login_btn = gtk.Button() #登录按钮
+        login_btn.set_image(login_img)
         login_btn.connect("clicked", self.login)
-        logout_btn = gtk.Button("Logout") #注销按钮
+        login_btn.set_tooltip_text(u"登录")
+
+        logout_btn = gtk.Button() #注销按钮
+        logout_btn.set_image(logout_img)
         logout_btn.connect("clicked", self.logout)
-        setting_btn = gtk.Button("s")
+        logout_btn.set_tooltip_text(u"注销")
+
+        setting_btn = gtk.Button()
+        setting_btn.set_image(setting_img)
         setting_btn.connect("clicked", self.Se)
-        about_btn = gtk.Button("a")
+        setting_btn.set_tooltip_text(u"设置")
+
+        about_btn = gtk.Button()
+        about_btn.set_image(about_img)
         about_btn.connect("clicked", self.Ab)
+        about_btn.set_tooltip_text("关于")
 
         fixed = gtk.Fixed()
         fixed.put(setting_btn, 100,20)
-        fixed.put(about_btn, 120, 20)
-        fixed.put(login_btn, 20, 40)
-        fixed.put(logout_btn, 80, 40)
+        fixed.put(about_btn, 140, 20)
+        fixed.put(login_btn, 20, 50)
+        fixed.put(logout_btn, 80, 50)
 
         self.add(fixed)
         self.show_all()
@@ -223,6 +245,7 @@ def log_out(user, password):
     revalue = resp.read()
     return revalue # 返回注销结果
 
-MainFrame()
-gtk.main()
+if __name__ == '__main__':
+    MainFrame()
+    gtk.main()
 
