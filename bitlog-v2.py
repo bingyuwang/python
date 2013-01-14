@@ -1,4 +1,4 @@
-# coding:utf-8
+ï»¿# coding:utf-8
 import gtk
 import urllib
 import urllib2
@@ -10,16 +10,16 @@ import cPickle as pickle
 
 class MainFrame(gtk.Window):
     def __init__(self):
-        super(MainFrame, self).__init__() # ³õÊ¼»¯
+        super(MainFrame, self).__init__() # åˆå§‹åŒ–
 
-        self.set_title("BitLog") # ±êÌâ
-        self.set_size_request(250, 100) # ´°¿Ú´óĞ¡
-        self.set_position(gtk.WIN_POS_CENTER)
+        self.set_title("BitLog") # æ ‡é¢˜
+        self.set_size_request(250, 100) # çª—å£å¤§å°
+        self.set_position(gtk.WIN_POS_CENTER) # çª—å£ä½ç½®
         self.connect("destroy", gtk.main_quit)
         
-        login_btn = gtk.Button("Login")
+        login_btn = gtk.Button("Login") #ç™»å½•æŒ‰é’®
         login_btn.connect("clicked", self.login)
-        logout_btn = gtk.Button("Logout")
+        logout_btn = gtk.Button("Logout") #æ³¨é”€æŒ‰é’®
         logout_btn.connect("clicked", self.logout)
         setting_btn = gtk.Button("s")
         setting_btn.connect("clicked", self.Se)
@@ -34,22 +34,70 @@ class MainFrame(gtk.Window):
 
         self.add(fixed)
         self.show_all()
+
+        global user, pswd, sta
+        try:
+            fuser = file('user.pkl','rb+')
+            fpswd = file('pswd.pkl','rb+')
+            fsta = file('sta.pkl','rb+')
+            user = pickle.load(fuser)
+            pswd = pickle.load(fpswd)
+            sta = pickle.load(fsta)
+        except:
+            fuser = file('user.pkl','wb+')
+            fpswd = file('pswd.pkl','wb+')
+            fsta = file('sta.pkl','wb+')
+            user = ''
+            pswd = ''
+            sta = 0
     
     def login(self, widget):
         signal, info = log_in(user, pswd, sta)
         if signal:
             self.iconify()
         else:
-            print info
+            self.Message(self, info)
 
     def logout(self, widget):
         info  = log_out(user, pswd)
-        print info
+        self.Message(self, info)
         
     # Settings
     def Se(self, widget):
         settings()
 
+    # æ¶ˆæ¯æ¡†
+    def Message(self, widget, case):
+        if case == 'username_error':
+            info = u"ç”¨æˆ·åé”™è¯¯"
+        elif case == 'password_error':
+            info = u"å¯†ç é”™è¯¯"
+        elif case == 'status_error':
+            info = u"ç”¨æˆ·å·²æ¬ è´¹"
+        elif case == 'available_error':
+            info = u"ç”¨æˆ·å·²ç¦ç”¨"
+        elif case == 'ip_exist_error':
+            info = u"IPå°šæœªä¸‹çº¿ï¼Œè¯·ç¨å"
+        elif case == 'usernum_error':
+            info = u"ç”¨æˆ·æ•°å·²è¾¾ä¸Šé™"
+        elif case == 'online_num__error':
+            info = u"ç™»é™†äººæ•°è¶…è¿‡é™é¢"
+        elif case == 'logout_error':
+            info = u"æ‚¨ä¸åœ¨çº¿ä¸Š"
+        elif case == 'logout_ok':
+            info = u"æ³¨é”€æˆåŠŸ"
+        elif case == 'ip_error':
+            info = u"æ‚¨çš„IPä¸åˆæ³•"
+        else:
+            info = u"æš‚æ—¶æ— æ³•å®Œæˆæ“ä½œ"
+
+        md = gtk.MessageDialog(self, 
+            gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_INFO, 
+            gtk.BUTTONS_CLOSE, info)
+        md.run()
+        md.destroy()
+        
+    # About
     def Ab(self, widget):
         about = gtk.AboutDialog()
         about.set_program_name("BitLog")
@@ -60,7 +108,6 @@ class MainFrame(gtk.Window):
         about.run()
         about.destroy()
 
-        
 class settings(gtk.Window):
     def __init__(self):
         super(settings, self).__init__()
@@ -74,11 +121,13 @@ class settings(gtk.Window):
         global user_entry, pswd_entry, sta
         sta = 1
 
-        user_entry = gtk.Entry()
-        pswd_entry = gtk.Entry()
+        user_entry = gtk.Entry(40)
+        pswd_entry = gtk.Entry(40)
+        pswd_entry.set_visibility(False)# å¯†ç æ–‡æœ¬æ¡†å­—ç¬¦ä¸å¯è§
+        user_entry.set_max_length(20)
+        pswd_entry.set_max_length(20)
 
-        sta_btn = gtk.CheckButton("guojiliuliang") # ¹ú¼ÊÁ÷Á¿
-        sta_btn.set_active(True)
+        sta_btn = gtk.CheckButton(u"ä»…ä½¿ç”¨å…è´¹æµé‡") # æ˜¯å¦å›½é™…æµé‡
         sta_btn.connect("clicked", self.sta_change)
         
         save_btn = gtk.Button("Save")
@@ -92,12 +141,32 @@ class settings(gtk.Window):
         self.add(fixed)
         self.show_all()
     
-    
-    def sta_change(self, widget):
-        if widget.get_active():
+        try:
+            fuser = file('user.pkl','rb+')
+            fpswd = file('pswd.pkl','rb+')
+            fsta = file('sta.pkl','rb+')
+            user = pickle.load(fuser)
+            pswd = pickle.load(fpswd)
+            sta = pickle.load(fsta)
+        except:
+            fuser = file('user.pkl','wb+')
+            fpswd = file('pswd.pkl','wb+')
+            fsta = file('sta.pkl','wb+')
+            user = ''
+            pswd = ''
             sta = 0
-        else:
+
+        user_entry.set_text(user)
+        pswd_entry.set_text(pswd)
+        if sta:
+            sta_btn.set_active(True)
+
+    def sta_change(self, widget):
+        global sta
+        if widget.get_active():
             sta = 1
+        else:
+            sta = 0
 
     def save(self, widget):
         global user, pswd, sta
@@ -111,21 +180,21 @@ class settings(gtk.Window):
         pickle.dump(sta,fsta)
         self.destroy()
 
-# µÇÂ¼ºÍ×¢Ïú
+# ç™»å½•å’Œæ³¨é”€
 def log_in(user, password, sta):
-    #´¦ÀíCookieĞÅÏ¢
+    #å¤„ç†Cookieä¿¡æ¯
     cj = cookielib.LWPCookieJar()
     opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
     urllib2.install_opener(opener)
-    #°ÑÃÜÂë½øĞĞMD5¼ÓÃÜ
+    #æŠŠå¯†ç è¿›è¡ŒMD5åŠ å¯†
     a = md5.new(password)
     pswd = a.hexdigest()
     login_pswd = pswd[8:-8]
     
     log_url = 'http://10.0.0.55/cgi-bin/do_login'#post_url
     login_info = {
-        'drop' : sta,    #1Îª½ö·ÃÎÊÃâ·Ñ×ÊÔ´£¬0Îª¿ÉÒÔÊ¹ÓÃ¹ú¼ÊÁ÷Á¿
-        'n' : 100,     #100ÎªÕı³£µÇÂ½£¬1ÎªÇ¿ÖÆ×¢Ïú
+        'drop' : sta,    #1ä¸ºä»…è®¿é—®å…è´¹èµ„æºï¼Œ0ä¸ºå¯ä»¥ä½¿ç”¨å›½é™…æµé‡
+        'n' : 100,     #100ä¸ºæ­£å¸¸ç™»é™†ï¼Œ1ä¸ºå¼ºåˆ¶æ³¨é”€
         'password' : login_pswd,
         'type': 1,
         'username' : user}
@@ -133,8 +202,8 @@ def log_in(user, password, sta):
         log_url,
         urllib.urlencode(login_info))
     resp = urllib2.urlopen(req)
-    revalue = resp.read()#¶ÁÈ¡·µ»ØĞÅÏ¢
-    if re.search('[^a-z]',revalue[0:1]): #µÇÂ½³É¹¦
+    revalue = resp.read()#è¯»å–è¿”å›ä¿¡æ¯
+    if re.search('[^a-z]',revalue[0:1]): #ç™»é™†æˆåŠŸ
         return True, 'succeed'
     else:
         return False, revalue
@@ -142,8 +211,8 @@ def log_in(user, password, sta):
 def log_out(user, password):
     log_url = 'http://10.0.0.55/cgi-bin/force_logout'
     logout_info = {
-        'drop' : 0,     #1Îª½ö·ÃÎÊÃâ·Ñ×ÊÔ´£¬0Îª¿ÉÒÔÊ¹ÓÃ¹ú¼ÊÁ÷Á¿
-        'n' : 1,        #100ÎªÕı³£µÇÂ½£¬1ÎªÇ¿ÖÆ×¢Ïú
+        'drop' : 0,     #1ä¸ºä»…è®¿é—®å…è´¹èµ„æºï¼Œ0ä¸ºå¯ä»¥ä½¿ç”¨å›½é™…æµé‡
+        'n' : 1,        #100ä¸ºæ­£å¸¸ç™»é™†ï¼Œ1ä¸ºå¼ºåˆ¶æ³¨é”€
         'password' : password,
         'type': 1,
         'username' : user}
@@ -152,7 +221,8 @@ def log_out(user, password):
         urllib.urlencode(logout_info))
     resp = urllib2.urlopen(req)
     revalue = resp.read()
-    return revalue # ·µ»Ø×¢Ïú½á¹û
+    return revalue # è¿”å›æ³¨é”€ç»“æœ
 
 MainFrame()
 gtk.main()
+
