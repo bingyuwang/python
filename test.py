@@ -5,8 +5,3 @@ def fun2(fun):
     return wrapper
 
 @fun2
-
-def pri():
-    print 'pri'
-
-pri()
