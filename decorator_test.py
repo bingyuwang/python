@@ -1,3 +1,17 @@
+def decorator(F):
+    def new_F(a,b):
+        print "input:"
+        print a,b
+        return F(a,b)
+    return new_F
+
+@decorator
+def square_sum(a,b):
+    return a**2 + b**2
+
+print(square_sum(3,4))
+
+"""
 def decorator(aClass):
     class newClass:
         def __init__(self, age):
@@ -20,7 +34,6 @@ eagleLord = Bird(5)
 for i in range(3):
     eagleLord.display()
 
-"""
 output:
 ('total display', 1)
 ('My age is', 5)
