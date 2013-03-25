@@ -4,20 +4,30 @@ from django.http import HttpResponse
 import urllib,urllib2,time,hashlib
 import xml.etree.ElementTree as ET
 from django.views.decorators.csrf import csrf_exempt  
+import re
 # from django.utils.encoding import smart_str, smart_unicode
 import xiaoche
 import translate
 import huanyi
 import weather
+import renren
 
-TOKEN = "******"
+TOKEN = ""
+
+welcome_msg = u"""
+欢迎关注「人在北理」校园助手
+
+"""
 
 help_info = u"""
 1.发送「校车」或「明天校车」可以查看校车时刻表。
 2.发送「环一」或「环1」可以查看环1公交发车时刻。
 3.发送「天气」或「空气」可以查看天气预报或空气质量。
 4.发送英文单词或句子可以进行翻译。
+5.发送「发状态」+「内容」会自动在人人主页发状态。
+"""
 
+report_info = u"""
 报告bug或有任何建议请发邮件至liamchzh@gmail.com
 ©Liam  http://liamchzh.com/about
 """
@@ -58,7 +68,9 @@ def responseMsg(request):
     return replyXml(msg, content)
 
 def process(msg):
-    if isinstance(msg, type('string')):
+    if msg == 'Hello2BizUser':
+        return welcome_msg+help_info
+    elif isinstance(msg, type('string')):
         return translate.translate(msg)
     elif msg == u'校车' or msg == u'明天校车':
         return xiaoche.get_timetable(msg)
@@ -68,10 +80,13 @@ def process(msg):
         return weather.weather()
     elif msg == u'空气':
         return weather.get_airquality()
-    elif msg == u'帮助':
-        return help_info
+    elif re.match(u"发状态", msg):
+        if msg[3:]:
+            return renren.renren_status(msg[3:])
+        else:
+            return u"请输入状态内容"
     else:
-        return u"无法处理请求，请回复「帮助」查看详细使用说明"
+        return u"无法处理请求，请查看使用说明" + help_info + report_info
 
 def paraseMsgXml(raw_msg):  
     root = ET.fromstring(raw_msg)
@@ -93,3 +108,4 @@ def replyXml(recvmsg, replyContent):
                 """
     echostr = textTpl % (recvmsg['FromUserName'], recvmsg['ToUserName'], recvmsg['CreateTime'], recvmsg['MsgType'], replyContent)
     return echostr
+
