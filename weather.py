@@ -6,7 +6,7 @@ url_hd = 'http://m.weather.com.cn/data/101010200.html'
 url_fs = 'http://m.weather.com.cn/data/101011200.html'
 urls = [url_hd, url_fs]
 
-url_aqi = 'http://pm25.in/api/querys/aqi_details.json?city=beijing&token=5wsoXkR4YU3ygEFyrwng'
+url_aqi = 'http://pm25.in/api/querys/aqi_details.json?city=beijing&token=****************'
 
 def weather():
     weather = u""
