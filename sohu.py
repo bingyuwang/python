@@ -1,65 +1,67 @@
 # coding:utf-8
 
 import urllib2
+import socket
 import Queue
 import threading
+import sys
+import datetime
 
-urls = ["http://m.sohu.com/"]
+# 已经爬过的链接和不需要爬的链接
 crawledurl = []
+filterurl = ["javascript:void(0);", "#", "javascript:;", "javascript:window.scrollTo(0,0);"]
 
 crawl_queue = Queue.Queue()
 
 def get_next_link(page):
+    """找到下一个href，提取链接"""
     start_link = page.find("href=")
     if start_link == -1:
         return None, 0
     start_quote = page.find('"', start_link)
     end_quote = page.find('"', start_quote + 1)
     url = page[start_quote + 1:end_quote]
+    if url in filterurl:
+        url = "/"
     return url, end_quote
  
 def get_all_links(page, baseurl):
+    """获取整个页面的链接"""
     while True:
         url, endpos = get_next_link(page)
         if url == None: 
             break
         elif url.startswith("http"):
-            #urls.append(url)
-            #print "http:"+ url
             crawl_queue.put(url)
             page = page[endpos+1:]
-        elif url.startswith("javascript"):
-            pass
         else:
             crawl_queue.put(baseurl[:-1]+url)
             page = page[endpos+1:]
 
 def write_log(error, url):
+    """把错误信息写入日志"""
     ferror = open("log.txt", "a")
-    ferror.write(error)
+    ferror.write(error+" ")
+    ferror.write(str(datetime.datetime.now())+" ")
     ferror.write(url+'\n')
     ferror.close()
 
 def check_link(url):
-    """
-    f = open("urls.txt", "a")
-    f.write(url)
-    f.close()
-    """
+    """分析链接"""
+    crawledurl.append(url)
     try:
         resp = urllib2.urlopen(url, timeout=5)
     except urllib2.HTTPError,e:
-        write_log("HTTPError", url)
+        write_log("HTTPError:"+str(e.code), url)
     except urllib2.URLError,e:
-        write_log("URLError", url)
+        write_log("URLError:"+str(e.reason), url)
+    except socket.timeout:
+        write_log("TiemoutError:", url)
     except:
-        print "timeout:" + url
-        write_log("unknow", url)
+        write_log("UnkonwError:", url)
     else:
-        print "check:" + url
         page = resp.read()
         get_all_links(page, url)
-        crawledurl.append(url)
 
 class CrawlUrl(threading.Thread):
     def __init__(self, crawl_queue):
@@ -73,15 +75,14 @@ class CrawlUrl(threading.Thread):
                 check_link(url)
             self.crawl_queue.task_done()
 
-    
 def main():
     for i in range(10):
         crawlthread = CrawlUrl(crawl_queue)
         crawlthread.setDaemon(True)
         crawlthread.start()
 
-        for url in urls:
-            crawl_queue.put(url)
+        url = "http://m.sohu.com/"
+        crawl_queue.put(url)
 
     crawl_queue.join()
 
